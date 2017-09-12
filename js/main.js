@@ -14,7 +14,6 @@ function preload() {
 }
 
 function create() {
-	
 	player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
 	player.anchor.setTo(0.5, 0.5);
 	
@@ -60,7 +59,6 @@ function shoot() {
 			bullets.splice(i, 1);
 		}
 	}
-	console.log(bullets.length);
 }
 
 function movePlayer() {
@@ -78,6 +76,7 @@ function movePlayer() {
 	}
 	if (dKey.isDown) {
 		moveX += moveSpeed;
+		game.camera.x += moveSpeed;
 	}
 	
 	if (moveX != 0 && moveY != 0) {
@@ -87,6 +86,20 @@ function movePlayer() {
 	
 	player.x += moveX;
 	player.y += moveY;
+	
+	if (player.x + player.width / 2 > game.world.width) {
+		player.x = game.world.width - player.width / 2;
+	}
+	else if (player.x - player.width / 2 < 0) {
+		player.x = player.width / 2;
+	}
+	if (player.y + player.height / 2 > game.world.height) {
+		player.y = game.world.height - player.height / 2;
+	}
+	else if (player.y - player.height / 2 < 0) {
+		player.y = player.height / 2;
+	}
+	
 }
 
 function aim() {
