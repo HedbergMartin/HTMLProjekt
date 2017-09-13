@@ -18,7 +18,7 @@ function create() {
 	player.anchor.setTo(0.5, 0.5);
 	
 	weapon = game.add.sprite(0, 0, 'weapon');
-	weapon.anchor.setTo(0, 0.5);
+	weapon.anchor.setTo(0, -1);
 	
 	wKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
 	aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
@@ -62,8 +62,8 @@ function shoot() {
 }
 
 function movePlayer() {
-	moveX = 0;
-	moveY = 0;
+	var moveX = 0;
+	var moveY = 0;
 	
 	if (wKey.isDown) {
 		moveY -= moveSpeed;
