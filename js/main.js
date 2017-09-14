@@ -48,7 +48,9 @@ function create() {
 	dKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
 	LMB = game.input.activePointer;
 
-	spawnBugs(10); //TODO remove and implement waves
+	wave = 0;
+	countWave1 = 0;
+	countWave2 = 0;
 }
 
 function update() {
@@ -57,6 +59,7 @@ function update() {
 	shoot();
 
 	//updateBugs();
+	checkWave();
 	game.physics.arcade.overlap(bullets, bugs, collisionHandler, null, this);
 	game.physics.arcade.collide(bugs, bugs);
 	bugs.forEach(updateBug, this, true);
@@ -128,27 +131,29 @@ function aim() {
 	//weapon.angle = playerDegrees;
 }
 
+function checkWave() {
+	if (countWave1 < 60) {
+		countWave1++;
+	}
+	else if (countWave2 < wave){
+		spawnBugs(3);
+		countWave1 = 0;
+		countWave2++;
+	}
+	if (bugs.length == 0 && countWave2 == wave) {
+		wave++;
+		countWave1 = 0;
+		countWave2 = 0;
+	}
+}
+
 function spawnBugs(amount) {
 	for (var i = 0; i < amount; i++) {
-		var spawnX, spawnY;
-		switch (game.math.between(0,3)){ //TODO byt till världsbredd
-			case 0: //Upper wall
-				spawnX = (Math.random() * 768) + 16;
-				spawnY = 16;
-			break;
-			case 1: //Right wall
-				spawnX = 784;
-				spawnY = (Math.random() * 768) + 16;
-			break;
-			case 2: //Bottom wall
-				spawnX = (Math.random() * 768) + 16;
-				spawnY = 784;
-			break;
-			case 3: //Left wall
-				spawnX = 16;
-				spawnY = (Math.random() * 768) + 16;
-			break;
-		};
+		
+		//TODO byt till världsmått
+		var randomRadian = Math.random() * 2 * Math.PI;
+		var spawnX = 400 + Math.cos(randomRadian) * 570;
+		var spawnY = 400 + Math.sin(randomRadian) * 570;
 
 		bugs.create(spawnX, spawnY, 'bug1');
 	}
@@ -168,6 +173,7 @@ function updateBugs() {
 
 function collisionHandler(bullet, bug) {
 	bullet.kill();
+	bugs.remove(bug);
 	bug.kill();
 }
 
