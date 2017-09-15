@@ -9,6 +9,8 @@ var mousePressed = false;
 var bugs;
 var bugMoveSpeed = 150;
 
+var kills = 0;
+
 function preload() {
 	game.load.image('player', 'assets/player.png');
 	game.load.image('weapon', 'assets/weapon.png');
@@ -24,6 +26,8 @@ function create() {
 	game.physics.enable(player, Phaser.Physics.ARCADE);
 	player.body.collideWorldBounds = true;
 	player.anchor.setTo(0.5, 0.5);
+	player.maxHealth = 3;
+	player.health = 3;
 	
 	//weapon = game.add.sprite(0, 0, 'weapon');
 	//weapon.anchor.setTo(0, -1);
@@ -51,6 +55,10 @@ function create() {
 	wave = 0;
 	countWave1 = 0;
 	countWave2 = 0;
+
+	wavecounter = game.add.text(100, 100, wave, {backgroundColor: 'WHITE'});
+	playerHealthCounter = game.add.text(100, 150, player.health, {backgroundColor: 'WHITE'});
+	KillCounter = game.add.text(100, 200, kills, {backgroundColor: 'WHITE'});
 }
 
 function update() {
@@ -60,6 +68,7 @@ function update() {
 
 	checkWave();
 	game.physics.arcade.overlap(bullets, bugs, collisionHandler, null, this);
+	game.physics.arcade.overlap(player, bugs, hitPlayer, null, this);
 	game.physics.arcade.collide(bugs, bugs);
 	bugs.forEach(updateBug, this, true);
 }
@@ -140,9 +149,7 @@ function checkWave() {
 		countWave2++;
 	}
 	if (bugs.length == 0 && countWave2 == wave) {
-		wave++;
-		countWave1 = 0;
-		countWave2 = 0;
+		newWave();
 	}
 }
 
@@ -174,11 +181,30 @@ function updateBugs() {
 
 function collisionHandler(bullet, bug) {
 	bullet.kill();
-	bugs.remove(bug);
-	bug.kill();
+	killBug(bug);
 }
 
 function getRandomNonExists(group) {
     var list = group.getAll('exists', false);
     return game.rnd.pick(list);
 };
+
+function newWave() {
+	wave++;
+	countWave1 = 0;
+	countWave2 = 0;
+	wavecounter.text = wave - 1;
+}
+
+function hitPlayer(playerToHit, bug) { //BUG, oavsätt ordning på args så är bug groupen alltid sist??
+	killBug(bug);
+	player.damage(1);
+	playerHealthCounter.text = player.health;
+}
+
+function killBug(bugToKill) {
+	bugs.remove(bugToKill);
+	bugToKill.kill();
+	kills++;
+	KillCounter.text = kills;
+}
