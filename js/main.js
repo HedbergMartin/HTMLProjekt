@@ -7,7 +7,7 @@ var bullets;
 var mousePressed = false;
 
 var bugs;
-var bugMoveSpeed = 200;
+var bugMoveSpeed = 150;
 
 function preload() {
 	game.load.image('player', 'assets/player.png');
@@ -58,7 +58,6 @@ function update() {
 	aim();
 	shoot();
 
-	//updateBugs();
 	checkWave();
 	game.physics.arcade.overlap(bullets, bugs, collisionHandler, null, this);
 	game.physics.arcade.collide(bugs, bugs);
@@ -136,7 +135,7 @@ function checkWave() {
 		countWave1++;
 	}
 	else if (countWave2 < wave){
-		spawnBugs(3);
+		spawnBugs(wave);
 		countWave1 = 0;
 		countWave2++;
 	}
@@ -157,6 +156,8 @@ function spawnBugs(amount) {
 
 		bugs.create(spawnX, spawnY, 'bug1');
 	}
+	bugs.setAll('anchor.x', .5);
+	bugs.setAll('anchor.y', .5);
 }
 
 function updateBugs() {
