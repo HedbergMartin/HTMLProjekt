@@ -9,11 +9,15 @@ var moveSpeed = 300;
 var bulletSpeed = 900;
 var bullets;
 var mousePressed;
+var fireingDelay;
+var lastFire;
 
 var bugs;
 var bugMoveSpeed = 150;
 
+var wave;
 var kills;
+var hpBar;
 
 function preloadGame() {
 	game.load.image('player', 'assets/player.png');
@@ -21,6 +25,9 @@ function preloadGame() {
 	game.load.image('bullet1', 'assets/0.png');
 	game.load.image('bullet2', 'assets/1.png');
 	game.load.image('bug1', 'assets/bug1.png');
+	game.load.image('bug2', 'assets/bug2.png');
+	game.load.image('hp', 'assets/lives.png');
+	game.load.bitmapFont('gamefont', 'assets/GameFont_0.png', 'assets/GameFont.xml');
 }
 
 function createGame() {
@@ -56,15 +63,20 @@ function createGame() {
 	sKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
 	dKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
 	LMB = game.input.activePointer;
+	fireingDelay = 20;
+	lastFire = 100;
 
 	wave = 0;
 	countWave1 = 0;
 	countWave2 = 0;
 	kills = 0;
 
-	wavecounter = game.add.text(100, 100, wave, {backgroundColor: 'WHITE'});
-	playerHealthCounter = game.add.text(100, 150, player.health, {backgroundColor: 'WHITE'});
-	KillCounter = game.add.text(100, 200, kills, {backgroundColor: 'WHITE'});
+	hpBar = game.add.group();
+	for (var hearts = 0; hearts < player.health; hearts++) {
+		hpBar.create(30 + (hearts * 40), 30, 'hp');
+	}
+	wavecounter = game.add.bitmapText(600, 30, 'gamefont', 'Wave\n ' + wave - 1);
+	KillCounter = game.add.bitmapText(300, 30, 'gamefont', 'Kills\n ' + kills);
 }
 
 function updateGame() {
@@ -89,17 +101,17 @@ function updateBug(bug) {
 }
 
 function shoot() {
-	if (LMB.isDown && !mousePressed) {
-		mousePressed = true;
+	if(lastFire < fireingDelay) {
+		lastFire++;
+	}
+	if (LMB.isDown && lastFire >= fireingDelay) {
 		bullet = getRandomNonExists(bullets);
 		if (bullet) {
 			bullet.reset(player.x, player.y);
 			bullet.body.velocity.x = bulletSpeed * Math.cos(playerRadians);
 			bullet.body.velocity.y = bulletSpeed * Math.sin(playerRadians);
+			lastFire = 0;
 		}
-	}
-	else if (!LMB.isDown && mousePressed) {
-		mousePressed = false;
 	}
 }
 
@@ -203,18 +215,25 @@ function newWave() {
 	wave++;
 	countWave1 = 0;
 	countWave2 = 0;
-	wavecounter.text = wave - 1;
+	setCounterText(wavecounter, 'Wave\n', wave-1);
+	if (wave == 6) {
+		fireingDelay = 8;
+	}
 }
 
 function hitPlayer(playerToHit, bug) { //BUG, oavsätt ordning på args så är bug groupen alltid sist??
 	killBug(bug);
 	player.damage(1);
-	playerHealthCounter.text = player.health;
+	hpBar.remove(hpBar.getAt(hpBar.length-1), true);
 }
 
 function killBug(bugToKill) {
 	bugs.remove(bugToKill);
 	bugToKill.kill();
 	kills++;
-	KillCounter.text = kills;
+	setCounterText(KillCounter, 'Kills\n', kills);
+}
+
+function setCounterText(textObj, prefix, number) {
+	textObj.setText(prefix + ' ' + number);
 }

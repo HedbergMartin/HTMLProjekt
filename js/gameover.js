@@ -5,19 +5,19 @@ var gameoverState = {
 	},
 
 	create: function() {
+		var gameinfo = game.add.bitmapText(300, 400, 'gamefont', 'Wave');
+		gameinfo.setText('Waves ' + (wave-1) + '\nKills ' + kills);
 		var gos = game.add.sprite(400, 200, 'gameover'); //TODO worldbounds
-		gos.anchor.x = .5;
-		gos.anchor.y = .5;
-		gos.scale.x = 4;
-		gos.scale.y = 4;
+		gos.anchor.setTo(.5, .5);
+		gos.scale.setTo(4, 4);
 		gos.smoothed = false;
-		game.input.keyboard.onDownCallback = function() {
-			game.input.keyboard.onDownCallback = null;
-			game.state.start('gameState');
-		}
+
+		spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	},
 
 	update: function() {
-		
+		if (spaceKey.isDown) {
+			game.state.start('gameState');
+		}
 	}
 }
