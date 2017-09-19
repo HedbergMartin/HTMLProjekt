@@ -5,6 +5,7 @@ var gameState = {
 }
 
 var player;
+var playerActive = true;
 var moveSpeed = 300;
 var bulletSpeed = 900;
 var bullets;
@@ -66,7 +67,7 @@ function createGame() {
 	fireingDelay = 20;
 	lastFire = 100;
 
-	wave = 0;
+	wave = 30;
 	countWave1 = 0;
 	countWave2 = 0;
 	kills = 0;
@@ -80,18 +81,41 @@ function createGame() {
 }
 
 function updateGame() {
-	if (player.alive) {
+	if (player.alive && playerActive) {
 		movePlayer();
 		aim();
-		shoot();
-
+		if (lastFire < fireingDelay) {
+			lastFire++;
+		}
+		if (LMB.isDown && lastFire >= fireingDelay) {
+			shoot(playerRadians);
+		}
+		
 		checkWave();
 		game.physics.arcade.overlap(bullets, bugs, collisionHandler, null, this);
 		game.physics.arcade.overlap(player, bugs, hitPlayer, null, this);
 		game.physics.arcade.collide(bugs, bugs);
 		bugs.forEach(updateBug, this, true);
-	} else {
+	} else if (!player.alive) {
 		game.state.start('gameoverState');
+	} else {
+		game.physics.arcade.overlap(bullets, bugs, collisionHandler, null, this);
+		killRemainingBugs();
+	}
+}
+
+function killRemainingBugs() {
+	if (bugs.length > 0) {
+		bugs.forEach(function(bug) {
+			playerRadians = Math.atan(-(player.y - bug.y) / (bug.x - player.x));
+			if (bug.x < player.x) {
+				playerRadians += Math.PI;
+			}
+			shoot(playerRadians);
+		});
+	}
+	else {
+		playerActive = true;
 	}
 }
 
@@ -100,19 +124,14 @@ function updateBug(bug) {
 	bug.angle = angle * (360 / (2 * Math.PI));
 }
 
-function shoot() {
-	if(lastFire < fireingDelay) {
-		lastFire++;
-	}
-	if (LMB.isDown && lastFire >= fireingDelay) {
-		bullet = getRandomNonExists(bullets);
+function shoot(radians) {
+	bullet = getRandomNonExists(bullets);
 		if (bullet) {
 			bullet.reset(player.x, player.y);
-			bullet.body.velocity.x = bulletSpeed * Math.cos(playerRadians);
-			bullet.body.velocity.y = bulletSpeed * Math.sin(playerRadians);
+			bullet.body.velocity.x = bulletSpeed * Math.cos(radians);
+			bullet.body.velocity.y = bulletSpeed * Math.sin(radians);
 			lastFire = 0;
 		}
-	}
 }
 
 function movePlayer() {
@@ -225,6 +244,9 @@ function hitPlayer(playerToHit, bug) { //BUG, oavsätt ordning på args så är 
 	killBug(bug);
 	player.damage(1);
 	hpBar.remove(hpBar.getAt(hpBar.length-1), true);
+	playerActive = false;
+	player.body.velocity.x = 0;
+	player.body.velocity.y = 0;
 }
 
 function killBug(bugToKill) {
