@@ -5,7 +5,7 @@ var gameState = {
 }
 
 var player;
-var playerActive = true;
+var playerActive;
 var moveSpeed = 300;
 var bulletSpeed = 900;
 var bullets;
@@ -42,6 +42,7 @@ function createGame() {
 	player.anchor.setTo(0.5, 0.5);
 	player.maxHealth = 3;
 	player.health = 3;
+	playerActive = true;
 	
 	//weapon = game.add.sprite(0, 0, 'weapon');
 	//weapon.anchor.setTo(0, -1);
@@ -69,7 +70,7 @@ function createGame() {
 	fireingDelay = 20;
 	lastFire = 100;
 
-	wave = 30;
+	wave = 0;
 	countWave1 = 0;
 	countWave2 = 0;
 	kills = 0;
@@ -239,10 +240,10 @@ function newWave() {
 }
 
 function hitPlayer(playerToHit, bug) { //BUG, oavsätt ordning på args så är bug groupen alltid sist??
+	playerActive = false;
 	killBug(bug);
 	player.damage(1);
 	hpBar.remove(hpBar.getAt(hpBar.length-1), true);
-	playerActive = false;
 	player.body.velocity.x = 0;
 	player.body.velocity.y = 0;
 }
@@ -250,8 +251,10 @@ function hitPlayer(playerToHit, bug) { //BUG, oavsätt ordning på args så är 
 function killBug(bugToKill) {
 	bugs.remove(bugToKill);
 	bugToKill.kill();
-	kills++;
-	setCounterText(KillCounter, 'Kills\n', kills);
+	if (playerActive) {
+		kills++;
+		setCounterText(KillCounter, 'Kills\n', kills);
+	}
 }
 
 function setCounterText(textObj, prefix, number) {
