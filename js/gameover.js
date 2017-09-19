@@ -1,23 +1,33 @@
 var gameoverState = {
 
 	preload: function() {
-		game.load.image('gameover', 'assets/gameover.png');
+		game.load.image('gameover', 'assets/gameover400px.png');
+		game.load.image('rs', 'assets/pressanykeytorestart.png');
 	},
 
 	create: function() {
-		var gameinfo = game.add.bitmapText(300, 400, 'gamefont', 'Wave');
+		var gameinfo = game.add.bitmapText(game.width/2, 400, 'gamefont', 'Wave');
 		gameinfo.setText('Waves ' + (wave-1) + '\nKills ' + kills);
-		var gos = game.add.sprite(400, 200, 'gameover'); //TODO worldbounds
-		gos.anchor.setTo(.5, .5);
-		gos.scale.setTo(4, 4);
-		gos.smoothed = false;
+		gameinfo.anchor.setTo(.5, .5);
 
-		spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+		var gos = game.add.sprite(game.width/2, 200, 'gameover'); //TODO worldbounds
+		gos.anchor.setTo(.5, .5);
+
+		var rsSprite = game.add.sprite(game.width/2, 600, 'rs');
+		rsSprite.anchor.setTo(.5, .5);
+
+		timeRestart = 0;
 	},
 
 	update: function() {
-		if (spaceKey.isDown) {
-			game.state.start('gameState');
+		if (timeRestart == 100) {
+			game.input.keyboard.onDownCallback = function() {
+				game.input.keyboard.onDownCallback = null;
+				game.state.start('gameState');
+			}
+			timeRestart++;
+		}else if (timeRestart < 100) {
+			timeRestart++;
 		}
 	}
 }
