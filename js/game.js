@@ -19,6 +19,8 @@ var wave;
 var kills;
 var hpBar;
 
+var bugArray = ['bug1', 'bug2'];
+
 function preloadGame() {
 	game.load.image('player', 'assets/player.png');
 	game.load.image('weapon', 'assets/weapon.png');
@@ -143,9 +145,6 @@ function movePlayer() {
 }
 
 function aim() {
-	//weapon.x = player.x;
-	//weapon.y = player.y;
-	
 	mouseX = game.input.mousePointer.x;
 	mouseY = game.input.mousePointer.y;
 	
@@ -158,7 +157,6 @@ function aim() {
 	}
 	
 	player.angle = playerDegrees;
-	//weapon.angle = playerDegrees;
 }
 
 function checkWave() {
@@ -183,7 +181,7 @@ function spawnBugs(amount) {
 		var spawnX = 400 + Math.cos(randomRadian) * 570;
 		var spawnY = 400 + Math.sin(randomRadian) * 570;
 
-		bugs.create(spawnX, spawnY, 'bug1');
+		bugs.create(spawnX, spawnY, bugArray[Math.floor(Math.random() * bugArray.length)]);
 	}
 	bugs.setAll('anchor.x', .5);
 	bugs.setAll('anchor.y', .5);

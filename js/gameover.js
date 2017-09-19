@@ -10,7 +10,7 @@ var gameoverState = {
 		gameinfo.setText('Waves ' + (wave-1) + '\nKills ' + kills);
 		gameinfo.anchor.setTo(.5, .5);
 
-		var gos = game.add.sprite(game.width/2, 200, 'gameover'); //TODO worldbounds
+		var gos = game.add.sprite(game.width/2, 200, 'gameover');
 		gos.anchor.setTo(.5, .5);
 
 		var rsSprite = game.add.sprite(game.width/2, 600, 'rs');
