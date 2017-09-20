@@ -49,6 +49,7 @@ function preloadGame() {
 }
 
 function createGame() {
+	game.stage.backgroundColor = 0x4C4C4C;
 	game.physics.startSystem(Phaser.Physics.ARCADE);
 	
 	powerup = game.add.sprite(1000, 1000, 'powerup');
@@ -80,7 +81,9 @@ function createGame() {
 	bugs.physicsBodyType = Phaser.Physics.ARCADE;
 	
 	music = game.add.audio('music');
+	music.volume = 0.5;
 	shootSound = game.add.audio('shoot');
+	shootSound.volume = 0.5;
 	lifeLostSound = game.add.audio('lifeLost');
 	bugDieSound = game.add.audio('bugDie');
 	
