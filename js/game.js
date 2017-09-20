@@ -3,7 +3,6 @@ var gameState = {
 	create: createGame,
 	update: updateGame
 }
-
 var player;
 var playerActive;
 var moveSpeed = 300;
@@ -14,11 +13,17 @@ var fireingDelay;
 var lastFire;
 
 var bugs;
-var bugMoveSpeed = 150;
+var bugMoveSpeed = 100;
+
+var powerup;
 
 var wave;
 var kills;
 var hpBar;
+
+var coolGun = false;
+var coolGunTimer = 0;
+var coolGunUsedThisRound = false;
 
 var shootSound;
 var bugDieSound;
@@ -35,6 +40,7 @@ function preloadGame() {
 	game.load.image('bug1', 'assets/bug1.png');
 	game.load.image('bug2', 'assets/bug2.png');
 	game.load.image('hp', 'assets/lives.png');
+	game.load.image('powerup', 'assets/powerup.png');
 	game.load.bitmapFont('gamefont', 'assets/GameFont_0.png', 'assets/GameFont.xml');
 	game.load.audio('music', 'assets/music.mp3');
 	game.load.audio('bugDie', 'assets/bugDie.mp3');
@@ -44,7 +50,10 @@ function preloadGame() {
 
 function createGame() {
 	game.physics.startSystem(Phaser.Physics.ARCADE);
-
+	
+	powerup = game.add.sprite(1000, 1000, 'powerup');
+	powerup.anchor.setTo(0.5, 0.5);
+	
 	player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
 	game.physics.enable(player, Phaser.Physics.ARCADE);
 	player.body.collideWorldBounds = true;
@@ -99,6 +108,7 @@ function createGame() {
 
 function updateGame() {
 	if (player.alive && playerActive) {
+		coolGunTrigger();
 		movePlayer();
 		aim();
 		if (lastFire < fireingDelay) {
@@ -113,6 +123,7 @@ function updateGame() {
 		}
 		
 		checkWave();
+		
 		game.physics.arcade.overlap(bullets, bugs, collisionHandler, null, this);
 		game.physics.arcade.overlap(player, bugs, hitPlayer, null, this);
 		game.physics.arcade.collide(bugs, bugs);
@@ -122,6 +133,32 @@ function updateGame() {
 	} else {
 		game.physics.arcade.overlap(bullets, bugs, collisionHandler, null, this);
 		killRemainingBugs();
+	}
+}
+
+function pickUpPowerup() {
+	coolGun = true;
+	coolGunUsedThisRound = true;
+	powerup.x = 1000;
+	powerup.y = 1000;
+}
+
+function coolGunTrigger() {
+	if (player.x >= powerup.x - powerup.width / 2 && player.x <= powerup.x + powerup.width / 2) {
+		if (player.y >= powerup.y - powerup.height / 2 && player.y <= powerup.y + powerup.height / 2) {
+			pickUpPowerup();
+		}
+	}
+	if (Math.random() < 0.001 && !coolGun && powerup.x == 1000 && !coolGunUsedThisRound) {
+		coolGunTimer = 0;
+		powerup.x = 25 + Math.random() * 750;
+		powerup.y = 200 + Math.random() * 575;
+	}
+	if (coolGunTimer < 300 && coolGun) {
+		coolGunTimer++;
+	}
+	else {
+		coolGun = false;
 	}
 }
 
@@ -146,14 +183,28 @@ function updateBug(bug) {
 }
 
 function shoot(radians) {
-	bullet = getRandomNonExists(bullets);
+	if (coolGun) {
+		for (var i = 0; i < 10; i++) {
+			bullet = getRandomNonExists(bullets);
+			if (bullet) {
+				bullet.reset(player.x, player.y);
+				bullet.body.velocity.x = bulletSpeed * Math.cos(radians - Math.PI / 4 + (Math.PI / (2 * 10)) * i);
+				bullet.body.velocity.y = bulletSpeed * Math.sin(radians - Math.PI / 4 + (Math.PI / (2 * 10)) * i);
+				lastFire = 0;
+			}
+		}
+	} else {
+		bullet = getRandomNonExists(bullets);
 		if (bullet) {
 			bullet.reset(player.x, player.y);
 			bullet.body.velocity.x = bulletSpeed * Math.cos(radians);
 			bullet.body.velocity.y = bulletSpeed * Math.sin(radians);
 			lastFire = 0;
-			shootSound.play();
 		}
+	}
+	
+	
+	shootSound.play();
 }
 
 function movePlayer() {
@@ -251,11 +302,12 @@ function getRandomNonExists(group) {
 
 function newWave() {
 	wave++;
+	coolGunUsedThisRound = false;
 	countWave1 = 0;
 	countWave2 = 0;
 	setCounterText(wavecounter, 'Wave\n', wave-1);
-	if (wave == 6) {
-		fireingDelay = 8;
+	if (fireingDelay > 1) {
+		fireingDelay -= 1;
 	}
 }
 
