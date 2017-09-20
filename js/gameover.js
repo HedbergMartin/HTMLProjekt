@@ -7,7 +7,23 @@ var gameoverState = {
 
 	create: function() {
 		var gameinfo = game.add.bitmapText(game.width/2, 400, 'gamefont', 'Wave');
-		gameinfo.setText('Waves ' + (wave-1) + '\nKills ' + kills);
+		var highestWave = 0;
+		if (localStorage.getItem('waves') !== null) {
+			highestWave = parseInt(localStorage.getItem('waves'));
+		}
+		if (wave - 1 > highestWave) {
+			localStorage.setItem('waves', wave - 1);
+			highestWave = wave - 1;
+		}
+		var mostKills = 0;
+		if (localStorage.getItem('kills') !== null) {
+			mostKills = parseInt(localStorage.getItem('kills'));
+		}
+		if (kills  > mostKills) {
+			localStorage.setItem('kills', kills);
+			mostKills = kills;
+		}
+		gameinfo.setText('Highest wave: ' + highestWave + '\nMost kills: ' + mostKills + '\n\nWave: ' + (wave - 1) + '\nKills: ' + kills);
 		gameinfo.anchor.setTo(.5, .5);
 
 		var gos = game.add.sprite(game.width/2, 200, 'gameover');
