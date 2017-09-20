@@ -20,6 +20,11 @@ var wave;
 var kills;
 var hpBar;
 
+var shootSound;
+var bugDieSound;
+var lifeLostSound;
+var music;
+
 var bugArray = ['bug1', 'bug2'];
 
 function preloadGame() {
@@ -31,6 +36,10 @@ function preloadGame() {
 	game.load.image('bug2', 'assets/bug2.png');
 	game.load.image('hp', 'assets/lives.png');
 	game.load.bitmapFont('gamefont', 'assets/GameFont_0.png', 'assets/GameFont.xml');
+	game.load.audio('music', 'assets/music.mp3');
+	game.load.audio('bugDie', 'assets/bugDie.mp3');
+	game.load.audio('lifeLost', 'assets/lifeLost.mp3');
+	game.load.audio('shoot', 'assets/shoot.mp3');
 }
 
 function createGame() {
@@ -60,6 +69,11 @@ function createGame() {
 	bugs = game.add.group();
 	bugs.enableBody = true;
 	bugs.physicsBodyType = Phaser.Physics.ARCADE;
+	
+	music = game.add.audio('music');
+	shootSound = game.add.audio('shoot');
+	lifeLostSound = game.add.audio('lifeLost');
+	bugDieSound = game.add.audio('bugDie');
 	
 	mousePressed = false;
 	wKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
@@ -92,6 +106,10 @@ function updateGame() {
 		}
 		if (LMB.isDown && lastFire >= fireingDelay) {
 			shoot(playerRadians);
+		}
+		
+		if (!music.isPlaying) {
+			music.play();
 		}
 		
 		checkWave();
@@ -134,6 +152,7 @@ function shoot(radians) {
 			bullet.body.velocity.x = bulletSpeed * Math.cos(radians);
 			bullet.body.velocity.y = bulletSpeed * Math.sin(radians);
 			lastFire = 0;
+			shootSound.play();
 		}
 }
 
@@ -222,6 +241,7 @@ function updateBugs() {
 function collisionHandler(bullet, bug) {
 	bullet.kill();
 	killBug(bug);
+	bugDieSound.play();
 }
 
 function getRandomNonExists(group) {
@@ -246,6 +266,7 @@ function hitPlayer(playerToHit, bug) { //BUG, oavsätt ordning på args så är 
 	hpBar.remove(hpBar.getAt(hpBar.length-1), true);
 	player.body.velocity.x = 0;
 	player.body.velocity.y = 0;
+	lifeLostSound.play();
 }
 
 function killBug(bugToKill) {
